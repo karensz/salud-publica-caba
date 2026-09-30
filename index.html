@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Observatorio en Salud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#16202a;--mut:#5f6b77;--line:#e3e7eb;--acc:#0f766e;--pos:#16a34a;--neg:#dc2626;--mix:#d97706;--neu:#94a3b8;
+--sur:#0f766e;--oeste:#7c3aed;--centro:#2563eb;--norte:#db2777;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1419;--card:#172028;--ink:#e6edf3;--mut:#93a1ad;--line:#26323c;--acc:#2dd4bf;--sur:#2dd4bf;--oeste:#a78bfa;--centro:#60a5fa;--norte:#f472b6}}
+:root[data-theme="dark"]{--bg:#0e1419;--card:#172028;--ink:#e6edf3;--mut:#93a1ad;--line:#26323c;--acc:#2dd4bf;--sur:#2dd4bf;--oeste:#a78bfa;--centro:#60a5fa;--norte:#f472b6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 40px}
+.top{margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+.logo{width:22px;height:22px;border-radius:6px;background:var(--acc);position:relative;flex:none}
+.logo::before,.logo::after{content:"";position:absolute;background:var(--card);border-radius:1px}
+.logo::before{left:9px;top:4px;width:4px;height:14px}.logo::after{left:4px;top:9px;width:14px;height:4px}
+.lvl{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:14px}
+.lvl .card{cursor:pointer;transition:border-color .15s}.lvl .card:hover{border-color:var(--acc)}
+.lvl .go{font-size:12px;color:var(--acc);font-weight:600;margin-top:8px}
+.prose{max-width:760px}.prose h3{margin-top:18px}.prose p,.prose li{font-size:14px;color:var(--ink);margin-bottom:8px}.prose ul{padding-left:20px}
+.prose a,footer a{color:var(--acc)}
+.src-t{margin:6px 0 10px}.src-t th{cursor:default;white-space:nowrap;vertical-align:top}.src-t td{vertical-align:top}.src-t a{color:var(--acc)}
+.note{background:color-mix(in srgb,var(--acc) 8%,var(--card));border:1px solid color-mix(in srgb,var(--acc) 30%,var(--line));border-radius:10px;padding:12px 14px;font-size:13px}
+h1{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--mut);font-size:13px;margin-top:4px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font:600 14px Inter,system-ui,sans-serif;padding:10px 16px;cursor:pointer;white-space:nowrap}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.pane{display:none}.pane.on{display:block}
+.bar-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.bar-row p{color:var(--mut);font-size:13px;max-width:640px}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.filters label{display:flex;flex-direction:column;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;gap:4px}
+select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.kl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.kv{font-size:30px;font-weight:700;margin:4px 0 2px;letter-spacing:-.02em}
+.kn{font-size:12px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:14px}
+.s8{grid-column:span 8}.s4{grid-column:span 4}.s7{grid-column:span 7}.s5{grid-column:span 5}
+@media(max-width:900px){.s8,.s4,.s7,.s5{grid-column:span 12}}
+.col{display:flex;flex-direction:column;gap:14px}
+h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.hint{font-size:12px;color:var(--mut);margin-bottom:12px}
+.ch{position:relative;height:300px}
+.insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.ins{border-left:3px solid var(--acc);padding:2px 0 2px 12px}
+.ins b{display:block;font-size:13px;margin-bottom:2px}
+.ins p{font-size:13px;color:var(--mut)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:9px 10px;border-bottom:2px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
+th:hover{color:var(--ink)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:hover td{background:color-mix(in srgb,var(--acc) 6%,transparent)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600;color:#fff}
+.bar{display:inline-block;height:8px;border-radius:4px;vertical-align:middle}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;margin-right:4px;border:1px solid var(--line)}
+.tag.n{color:var(--neg)}.tag.p{color:var(--pos)}
+.wrap-td{white-space:normal;min-width:260px}.src a{color:var(--acc);text-decoration:none}.src a:hover{text-decoration:underline}
+footer{margin-top:18px;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><span>Observatorio en Salud</span></div>
+  <h1>La red pública de salud de la Ciudad de Buenos Aires, según quienes la usan</h1>
+  <div class="sub">Análisis independiente y no oficial · datos públicos de Google Maps y prensa · última actualización: 29/09/2026</div>
+</div>
+<nav class="tabs" role="tablist">
+  <button class="tab on" data-tab="i">Inicio</button>
+  <button class="tab" data-tab="c">Centros de salud (CeSAC)</button>
+  <button class="tab" data-tab="m">Especialidades (CEMAR)</button>
+  <button class="tab" data-tab="h">Hospitales</button>
+  <button class="tab" data-tab="t">Turnos: 147, Boti y BAX</button>
+  <button class="tab" data-tab="e">Especialidades</button>
+  <button class="tab" data-tab="x">Metodología</button>
+</nav>
+
+<!-- ============ INICIO ============ -->
+<section class="pane on" id="pane-i">
+  <div class="kpis">
+    <div class="card"><div class="kl">Establecimientos</div><div class="kv" id="i-k1"></div><div class="kn">50 CeSAC · 3 CEMAR · 35 hospitales</div></div>
+    <div class="card"><div class="kl">Reseñas en Google</div><div class="kv" id="i-k2"></div><div class="kn">calificaciones analizadas</div></div>
+    <div class="card"><div class="kl">Calificación promedio</div><div class="kv" id="i-k3"></div><div class="kn">toda la red, ponderada</div></div>
+    <div class="card"><div class="kl">Comentarios leídos</div><div class="kv" id="i-k4"></div><div class="kn">clasificados por tema y tono</div></div>
+  </div>
+  <div class="lvl">
+    <div class="card" data-go="c"><div class="kl">Primer nivel</div><h3 style="font-size:17px;margin:4px 0">Centros de salud (CeSAC)</h3><div class="kv" id="i-lc" style="font-size:24px"></div><p class="hint" style="margin:0">Principal queja: el trato en recepción y las colas para turnos y farmacia.</p><div class="go">Ver sección →</div></div>
+    <div class="card" data-go="m"><div class="kl">Segundo nivel</div><h3 style="font-size:17px;margin:4px 0">Especialidades (CEMAR)</h3><div class="kv" id="i-lm" style="font-size:24px"></div><p class="hint" style="margin:0">Los mejor valorados: atienden con turno y derivación, con menos colas.</p><div class="go">Ver sección →</div></div>
+    <div class="card" data-go="h"><div class="kl">Tercer nivel</div><h3 style="font-size:17px;margin:4px 0">Hospitales</h3><div class="kv" id="i-lh" style="font-size:24px"></div><p class="hint" style="margin:0">Principal queja: las esperas en la guardia. Los profesionales, lo más elogiado.</p><div class="go">Ver sección →</div></div>
+  </div>
+  <div class="grid">
+    <div class="card s5"><h3>Calificación promedio por nivel</h3><div class="hint">Estrellas en Google, ponderadas por nº de reseñas</div><div class="ch" style="height:280px"><canvas id="i-lvl"></canvas></div></div>
+    <div class="card s7"><h3>Quejas más frecuentes, por nivel</h3><div class="hint">Menciones negativas cada 100 comentarios leídos</div><div class="ch" style="height:280px"><canvas id="i-neg"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:12px">Lo que se repite en toda la red</h3>
+    <div class="insights">
+      <div class="ins" style="border-color:var(--pos)"><b>Los equipos de salud, lo mejor valorado</b><p>En los tres niveles, médicos y enfermería reciben la mayoría de los elogios.</p></div>
+      <div class="ins" style="border-color:var(--neg)"><b>El acceso, lo peor valorado</b><p>Conseguir turno, esperar en la guardia o en la fila de farmacia y ser bien atendido en la ventanilla concentran las quejas.</p></div>
+      <div class="ins" style="border-color:var(--neg)"><b>Especialidades que no alcanzan</b><p>La Ciudad reconoce falta de capacidad en salud mental, oftalmología y odontología. Las reseñas suman vacunatorio, clínica y ginecología. Ver <a href="#" data-go="e" style="color:var(--acc)">Especialidades</a>.</p></div>
+      <div class="ins" style="border-color:var(--mix)"><b>Turnos: la coordinación falla</b><p>Varias reseñas cuentan que los teléfonos de los centros no atienden o que el centro no reconoce un turno dado por el 147 o Boti.</p></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:4px">Lo que el Observatorio todavía no puede medir</h3>
+    <div class="hint">Datos que no son públicos o que quedaron pendientes. Se irán sumando a medida que se consigan.</div>
+    <div class="tbl"><table class="src-t"><thead><tr><th>Dato</th><th>Por qué falta</th><th>Cómo conseguirlo</th><th>Estado</th></tr></thead><tbody>
+      <tr><td class="wrap-td"><b>Turnos no otorgados y días de espera por especialidad</b></td><td class="wrap-td">La Ciudad no los publica</td><td class="wrap-td">Pedido de acceso a la información (Ley 104) al Ministerio de Salud</td><td><span class="tag n">Sin iniciar</span></td></tr>
+      <tr><td class="wrap-td"><b>Satisfacción de usuarios del 147 y Boti</b></td><td class="wrap-td">No hay encuestas públicas</td><td class="wrap-td">Pedido por Ley 104 de las encuestas, si existen</td><td><span class="tag n">Sin iniciar</span></td></tr>
+      <tr><td class="wrap-td"><b>Consultas atendidas por especialidad</b></td><td class="wrap-td">Son públicas, pero el sitio no respondía</td><td class="wrap-td">Instituto de Estadística de la Ciudad</td><td><span class="tag" style="color:var(--mix)">Reintentar</span></td></tr>
+      <tr><td class="wrap-td"><b>Reclamos formales por turnos y atención</b></td><td class="wrap-td">Son públicos, falta descargarlos y clasificarlos</td><td class="wrap-td">Datasets del SUACI y de la Defensoría del Pueblo (Buenos Aires Data)</td><td><span class="tag" style="color:var(--mix)">Pendiente</span></td></tr>
+      <tr><td class="wrap-td"><b>Opiniones en redes sociales</b></td><td class="wrap-td">Falta relevarlas</td><td class="wrap-td">Respuestas a publicaciones oficiales sobre el 147, Boti y BAX</td><td><span class="tag" style="color:var(--mix)">Pendiente</span></td></tr>
+      <tr><td class="wrap-td"><b>Lista oficial de establecimientos</b></td><td class="wrap-td">La lista actual se armó por búsqueda</td><td class="wrap-td">Cruzar con el listado oficial de la Ciudad</td><td><span class="tag" style="color:var(--mix)">Pendiente</span></td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="note"><b>Sobre el Observatorio.</b> Es un análisis independiente y no oficial, hecho con datos públicos. No representa al Gobierno de la Ciudad ni a ninguna institución. Las calificaciones provienen de Google Maps y el análisis de temas se basa en una muestra de comentarios. Más detalles en <a href="#" data-go="x" style="color:var(--acc)">Metodología</a>.</div>
+</section>
+
+<!-- ============ CESAC ============ -->
+<section class="pane" id="pane-c">
+  <div class="bar-row">
+    <p>50 Centros de Salud y Acción Comunitaria. Reseñas de Google Maps y casos recientes en prensa.</p>
+    <div class="filters">
+      <label>Zona<select id="c-fz"><option value="all">Todas</option><option>Sur</option><option>Oeste</option><option>Centro</option><option>Norte</option></select></label>
+      <label>Volumen de reseñas<select id="c-fv"><option value="0">Todos</option><option value="30">30 o más</option><option value="100">100 o más</option></select></label>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="card"><div class="kl">CeSAC analizados</div><div class="kv" id="c-k1"></div><div class="kn" id="c-k1n"></div></div>
+    <div class="card"><div class="kl">Reseñas en Google</div><div class="kv" id="c-k2"></div><div class="kn">suma de todas las calificaciones</div></div>
+    <div class="card"><div class="kl">Calificación promedio</div><div class="kv" id="c-k3"></div><div class="kn">ponderada por nº de reseñas</div></div>
+    <div class="card"><div class="kl">Casos en prensa</div><div class="kv" id="c-k5"></div><div class="kn">notas desde sep. 2024</div></div>
+    <div class="card"><div class="kl">Comentarios negativos</div><div class="kv" id="c-k4"></div><div class="kn" id="c-k4n"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card s8"><h3>Calificación por CeSAC</h3><div class="hint">Estrellas promedio en Google, de mayor a menor. Color = zona.</div><div class="ch" style="height:840px"><canvas id="c-rank"></canvas></div></div>
+    <div class="s4 col">
+      <div class="card"><h3>Tono de los comentarios</h3><div class="hint">Muestra de comentarios leídos y clasificados</div><div class="ch" style="height:220px"><canvas id="c-tone"></canvas></div></div>
+      <div class="card"><h3>Promedio por zona</h3><div class="hint">Ponderado por nº de reseñas</div><div class="ch" style="height:220px"><canvas id="c-group"></canvas></div></div>
+      <div class="card" style="flex:1"><h3>Lectura rápida</h3><div class="insights" id="c-quick" style="grid-template-columns:1fr"></div></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card s7"><h3>¿De qué se habla? Menciones por tema</h3><div class="hint">Cada comentario puede tocar varios temas. Verde = elogio, rojo = queja.</div><div class="ch" style="height:340px"><canvas id="c-theme"></canvas></div></div>
+    <div class="card s5"><h3>Calificación vs. volumen de reseñas</h3><div class="hint">Los centros más reseñados tienden a puntuar más bajo.</div><div class="ch" style="height:340px"><canvas id="c-scatter"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:12px">Hallazgos principales</h3>
+    <div class="insights">
+      <div class="ins"><b>La ventanilla es el problema número uno</b><p>El trato en recepción/admisión es por lejos el tema más criticado: descortesía, poca información y personal distraído aparecen en casi todos los centros.</p></div>
+      <div class="ins" style="border-color:var(--pos)"><b>Los profesionales salen bien parados</b><p>Médicos, odontólogos y sobre todo el equipo de enfermería/vacunatorio reciben mayoría de elogios, muchas veces con nombre propio.</p></div>
+      <div class="ins" style="border-color:var(--neg)"><b>Farmacia y turnos: colas desde la madrugada</b><p>Cupos diarios muy chicos para retirar medicación o sacar turno obligan a hacer fila desde las 3–6 a.m. Faltantes de medicamentos y vacunas.</p></div>
+      <div class="ins" style="border-color:var(--mix)"><b>El teléfono no responde</b><p>Queja recurrente en muchos centros: líneas y WhatsApp que nadie atiende, y turnos del 147 que luego no se respetan.</p></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card s4"><h3>Casos en prensa, por tema</h3><div class="hint">Notas periodísticas recientes</div><div class="ch" style="height:240px"><canvas id="c-press"></canvas></div></div>
+    <div class="card s8"><h3>Casos en prensa</h3><div class="hint">Resumen propio de cada nota. Solo notas desde septiembre de 2024; se excluyeron medios de partidos políticos de izquierda y notas sin fecha.</div>
+      <div class="tbl"><table><thead><tr><th style="cursor:default">Año</th><th style="cursor:default">CeSAC</th><th style="cursor:default">Tema</th><th style="cursor:default">Caso</th><th style="cursor:default">Fuente</th></tr></thead><tbody id="c-pb"></tbody></table></div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px"><h3>Detalle por CeSAC</h3><span class="hint" style="margin:0">Hacé clic en los encabezados para ordenar</span></div>
+    <div class="tbl"><table><thead><tr id="c-th"></tr></thead><tbody id="c-tb"></tbody></table></div>
+  </div>
+  <footer>Fuente: Google Maps (calificación y cantidad de reseñas de cada ficha), consultado el 24/09/2026. * El análisis de temas y tono se basa en una muestra de hasta 5 comentarios por centro (246 en total) leídos y clasificados manualmente; es indicativo, no representativo del total de reseñas. Los casos de prensa son notas publicadas desde septiembre de 2024; se excluyeron medios de partidos de izquierda, notas sin fecha y notas más antiguas. Fichas duplicadas en Google se consolidaron en la principal. Barrios y zonas son aproximados.</footer>
+</section>
+
+<!-- ============ CEMAR ============ -->
+<section class="pane" id="pane-m">
+  <div class="bar-row">
+    <p>Los 3 Centros Médicos Ambulatorios de Referencia de la Ciudad. Son el segundo nivel de atención: especialidades, estudios y laboratorio, entre el CeSAC y el hospital, con atención por derivación.</p>
+    <div class="filters">
+      <label>Zona<select id="m-fz"><option value="all">Todas</option><option>Sur</option><option>Oeste</option><option>Norte</option></select></label>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="card"><div class="kl">CEMAR analizados</div><div class="kv" id="m-k1"></div><div class="kn" id="m-k1n"></div></div>
+    <div class="card"><div class="kl">Reseñas en Google</div><div class="kv" id="m-k2"></div><div class="kn">suma de todas las calificaciones</div></div>
+    <div class="card"><div class="kl">Calificación promedio</div><div class="kv" id="m-k3"></div><div class="kn">ponderada por nº de reseñas</div></div>
+    <div class="card"><div class="kl">Comentarios negativos</div><div class="kv" id="m-k4"></div><div class="kn" id="m-k4n"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card s8"><h3>Calificación por CEMAR</h3><div class="hint">Estrellas promedio en Google. Color = zona.</div><div class="ch" style="height:200px"><canvas id="m-rank"></canvas></div>
+      <h3 style="margin-top:18px">¿De qué se habla? Menciones por tema</h3><div class="hint">Verde = elogio, rojo = queja.</div><div class="ch" style="height:240px"><canvas id="m-theme"></canvas></div></div>
+    <div class="s4 col">
+      <div class="card"><h3>Tono de los comentarios</h3><div class="hint">Muestra de comentarios leídos y clasificados</div><div class="ch" style="height:200px"><canvas id="m-tone"></canvas></div></div>
+      <div class="card" style="flex:1"><h3>Lectura rápida</h3><div class="insights" id="m-quick" style="grid-template-columns:1fr"></div></div>
+    </div>
+  </div>
+  <div style="display:none"><canvas id="m-group"></canvas><canvas id="m-scatter"></canvas></div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:12px">Hallazgos principales</h3>
+    <div class="insights">
+      <div class="ins" style="border-color:var(--pos)"><b>Mejor valorados que CeSAC y hospitales</b><p>Los tres CEMAR superan las 4 estrellas. Al atender por derivación y con turno, tienen menos demanda espontánea y menos colas.</p></div>
+      <div class="ins"><b>El CEMAR 3 arranca muy bien</b><p>Con edificio y equipamiento nuevos, los comentarios destacan limpieza, rapidez y turnos por el 147 en menos de 24 horas. Tiene pocas reseñas porque abrió en febrero de 2026.</p></div>
+      <div class="ins" style="border-color:var(--neg)"><b>Las quejas aparecen en el CEMAR 1</b><p>Esperas en la vereda antes de abrir, profesionales ausentes en turnos tempranos y falta de un contacto para consultar.</p></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px"><h3>Detalle por CEMAR</h3><span class="hint" style="margin:0">Hacé clic en los encabezados para ordenar</span></div>
+    <div class="tbl"><table><thead><tr id="m-th"></tr></thead><tbody id="m-tb"></tbody></table></div>
+  </div>
+  <footer>Fuente: Google Maps (calificación y cantidad de reseñas de cada ficha), consultado el 24/09/2026. * El análisis de temas y tono se basa en una muestra de hasta 5 comentarios por centro (15 en total) leídos y clasificados manualmente; con solo tres centros, es orientativo. Para el CEMAR 1 se usó su ficha propia; Google tiene además una ficha compartida con el CeSAC 22.</footer>
+</section>
+
+<!-- ============ HOSPITALES ============ -->
+<section class="pane" id="pane-h">
+  <div class="bar-row">
+    <p>Los 34 hospitales de la red pública porteña más el Garrahan (gestión compartida Nación-Ciudad). Incluye generales de agudos, pediátricos, especializados, de salud mental y odontológicos.</p>
+    <div class="filters">
+      <label>Tipo<select id="h-fg"><option value="all">Todos</option><option>Agudos</option><option>Pediátrico / materno</option><option>Especializado</option><option>Salud mental</option><option>Odontológico</option></select></label>
+      <label>Zona<select id="h-fz"><option value="all">Todas</option><option>Sur</option><option>Oeste</option><option>Centro</option><option>Norte</option></select></label>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="card"><div class="kl">Hospitales analizados</div><div class="kv" id="h-k1"></div><div class="kn" id="h-k1n"></div></div>
+    <div class="card"><div class="kl">Reseñas en Google</div><div class="kv" id="h-k2"></div><div class="kn">suma de todas las calificaciones</div></div>
+    <div class="card"><div class="kl">Calificación promedio</div><div class="kv" id="h-k3"></div><div class="kn">ponderada por nº de reseñas</div></div>
+    <div class="card"><div class="kl">Comentarios negativos</div><div class="kv" id="h-k4"></div><div class="kn" id="h-k4n"></div></div>
+  </div>
+  <div class="grid">
+    <div class="card s8"><h3>Calificación por hospital</h3><div class="hint">Estrellas promedio en Google, de mayor a menor. Color = tipo de hospital.</div><div class="ch" style="height:640px"><canvas id="h-rank"></canvas></div></div>
+    <div class="s4 col">
+      <div class="card"><h3>Tono de los comentarios</h3><div class="hint">Muestra de comentarios leídos y clasificados</div><div class="ch" style="height:220px"><canvas id="h-tone"></canvas></div></div>
+      <div class="card"><h3>Promedio por tipo</h3><div class="hint">Ponderado por nº de reseñas</div><div class="ch" style="height:220px"><canvas id="h-group"></canvas></div></div>
+      <div class="card" style="flex:1"><h3>Lectura rápida</h3><div class="insights" id="h-quick" style="grid-template-columns:1fr"></div></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card s7"><h3>¿De qué se habla? Menciones por tema</h3><div class="hint">Cada comentario puede tocar varios temas. Verde = elogio, rojo = queja.</div><div class="ch" style="height:340px"><canvas id="h-theme"></canvas></div></div>
+    <div class="card s5"><h3>Calificación vs. volumen de reseñas</h3><div class="hint">Los generales de agudos concentran mucho volumen y notas más bajas.</div><div class="ch" style="height:340px"><canvas id="h-scatter"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:12px">Hallazgos principales</h3>
+    <div class="insights">
+      <div class="ins" style="border-color:var(--neg)"><b>La guardia es el punto crítico</b><p>Es el tema con más quejas: esperas de 3 a 5 horas, poca información sobre el orden de atención y triage percibido como arbitrario. También recibe elogios cuando se trata de urgencias graves.</p></div>
+      <div class="ins" style="border-color:var(--pos)"><b>Los profesionales, lo mejor valorado</b><p>Médicos y enfermería concentran la mayoría de los elogios, sobre todo en internación, cirugía, maternidad y pediatría.</p></div>
+      <div class="ins"><b>Agudos vs. especializados</b><p>Los generales de agudos promedian claramente menos que los pediátricos/maternos y los especializados. El Grierson queda último y el Garrahan primero.</p></div>
+      <div class="ins" style="border-color:var(--mix)"><b>Edificios antiguos y seguridad en la puerta</b><p>Aparecen quejas por baños y salas sucias o deterioradas, y por el trato del personal de seguridad al restringir acompañantes.</p></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px"><h3>Detalle por hospital</h3><span class="hint" style="margin:0">Hacé clic en los encabezados para ordenar</span></div>
+    <div class="tbl"><table><thead><tr id="h-th"></tr></thead><tbody id="h-tb"></tbody></table></div>
+  </div>
+  <footer>Fuente: Google Maps (calificación y cantidad de reseñas de cada ficha), consultado el 24/09/2026. * El análisis de temas y tono se basa en una muestra de hasta 5 comentarios por hospital (175 en total) leídos y clasificados manualmente; es indicativo, no representativo del total de reseñas. Las reseñas de hospitales generales mezclan experiencias de guardia, consultorios e internación. Zonas aproximadas.</footer>
+</section>
+<!-- ============ TURNOS ============ -->
+<section class="pane" id="pane-t">
+  <div class="bar-row"><p>Cómo se piden los turnos en la red pública y qué dicen quienes usan esos canales. Cada fuente se muestra por separado, porque cada una representa a un público distinto. Ninguna mide la satisfacción de todos los usuarios (ver <a href="#tl" style="color:var(--acc)">cómo leer esta sección</a>).</p></div>
+  <div class="kpis">
+    <div class="card"><div class="kl">Reseñas de centros que nombran el canal</div><div class="kv" id="t-k1"></div><div class="kn" id="t-k1n"></div></div>
+    <div class="card"><div class="kl">BAX en Google Play</div><div class="kv">1,6 ★</div><div class="kn">482 opiniones (Android)</div></div>
+    <div class="card"><div class="kl">BAX en App Store</div><div class="kv">4,7 ★</div><div class="kn">97 calificaciones (iPhone)</div></div>
+    <div class="card"><div class="kl">Turnos de salud por día (147)</div><div class="kv">~10 mil</div><div class="kn">dato oficial, nov. 2025</div></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px">Fuente 1 · Reseñas de Google de centros y hospitales</h3>
+  <div class="grid">
+    <div class="card s7"><h3>Qué dicen cuando nombran el 147, Boti o la web de turnos</h3><div class="hint">Menciones explícitas en los 436 comentarios leídos. Rojo = negativa, verde = positiva.</div><div class="ch" style="height:250px"><canvas id="t-g"></canvas></div></div>
+    <div class="card s5"><h3>A quién representa</h3><div class="insights" style="grid-template-columns:1fr">
+      <div class="ins"><b>Personas que fueron a un centro y dejaron una reseña</b><p>Hablan de la atención en el centro. El canal de turnos aparece casi solo cuando algo falló, así que esta fuente exagera lo negativo.</p></div>
+      <div class="ins" style="border-color:var(--mix)"><b>Lo más repetido: el centro no reconoce el turno</b><p>Turnos dados por el 147 o Boti que el centro no respeta, cambia o dice no manejar. Es un problema de coordinación entre el canal y el centro más que del canal en sí.</p></div>
+      <div class="ins" style="border-color:var(--neu)"><b>Dato aparte: el teléfono de cada centro</b><p><span id="t-tel"></span> comentarios se quejan de que el teléfono o WhatsApp propio del centro no atiende. No es el 147 y no se suma arriba.</p></div>
+    </div></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px">Fuente 2 · Reseñas de la app BAX</h3>
+  <div class="grid">
+    <div class="card s4"><h3>La misma app, dos notas muy distintas</h3><div class="hint">Calificación promedio según la tienda</div><div class="ch" style="height:230px"><canvas id="t-cmp"></canvas></div></div>
+    <div class="card s4"><h3>Google Play: estrellas</h3><div class="hint">Las 20 opiniones más relevantes, leídas el 29/09/2026</div><div class="ch" style="height:230px"><canvas id="t-stars"></canvas></div></div>
+    <div class="card s4"><h3>Google Play: de qué hablan</h3><div class="hint">Temas en esas 20 opiniones (una puede tocar varios)</div><div class="ch" style="height:230px"><canvas id="t-bt"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px"><div class="insights">
+    <div class="ins" style="border-color:var(--neg)"><b>Las quejas son sobre la app, no sobre los turnos</b><p>Lo que más se repite son cuelgues, problemas para ingresar y validar la identidad, y un asistente que no entiende las consultas. Solo 3 de las 20 opiniones hablan de sacar turno.</p></div>
+    <div class="ins" style="border-color:var(--mix)"><b>Opiniones divididas sobre Boti</b><p>3 opiniones comparan con Boti: una dice que BAX es mucho mejor para sacar turno y dos que Boti funcionaba mejor o terminó siendo sólido.</p></div>
+    <div class="ins" style="border-color:var(--neu)"><b>Por qué el App Store da 4,7</b><p>Las opiniones visibles allí son de abril y mayo de 2026, durante la versión de prueba, antes del lanzamiento público de julio. En Google Play la mayoría es posterior al lanzamiento.</p></div>
+  </div></div>
+
+  <h3 style="margin:18px 0 8px">Fuente 3 · Datos oficiales</h3>
+  <div class="card" style="margin-bottom:14px"><div class="prose" style="max-width:none"><ul style="margin:0">
+    <li><b>Línea 147:</b> en noviembre de 2025 la Ciudad informó un refuerzo con más de 300 operadores y unos 10 mil turnos de salud por día.</li>
+    <li><b>Boti</b> (WhatsApp 11-5050-0147): da turnos, pero no publica calificaciones ni resultados de encuestas.</li>
+    <li><b>BAX:</b> la Ciudad informó más de 110 mil usuarios en sus primeras semanas (septiembre de 2026).</li>
+  </ul><p class="hint" style="margin:8px 0 0">Miden cuánto se usan los canales, no qué opinan los usuarios. Son cifras del propio Gobierno, no verificadas de forma independiente.</p></div></div>
+
+  <div class="card" id="tl" style="margin-bottom:14px"><div class="prose" style="max-width:none">
+    <h3 style="margin-top:0">Cómo leer esta sección</h3>
+    <p>Cada fuente muestra a un público distinto y ninguna reemplaza a una encuesta. Por eso no se suman ni se promedian entre sí.</p>
+    <ul>
+      <li><b>Reseñas de centros:</b> nombran el canal sobre todo cuando falló.</li>
+      <li><b>Reseñas de BAX:</b> usuarios de celular, más digitales. Hablan de la app en general, no solo de turnos. Y cada tienda da un resultado muy distinto.</li>
+      <li><b>Datos oficiales:</b> miden uso, no satisfacción.</li>
+      <li><b>Quién falta:</b> quienes usan sobre todo el teléfono del 147, a menudo personas mayores o menos digitales, casi no dejan reseñas. Es el grupo del que menos se sabe.</li>
+    </ul>
+    <h3>Próximos pasos</h3>
+    <ul>
+      <li>Relevar respuestas a las publicaciones oficiales sobre el 147, Boti y BAX en redes sociales, como fuente separada.</li>
+      <li>Analizar los reclamos sobre turnos en los datasets del SUACI y de la Defensoría del Pueblo (Buenos Aires Data).</li>
+      <li>Pedir por Ley 104 los resultados de las encuestas de satisfacción del 147 y Boti, si existen. Es el único dato que evitaría el sesgo de autoselección.</li>
+    </ul>
+  </div></div>
+  <footer>Fuentes: comentarios de Google Maps de CeSAC, CEMAR y hospitales (muestra leída y clasificada, 24/09/2026); opiniones de BAX en <a href="https://play.google.com/store/apps/details?id=com.gcba.bax&hl=es_AR&gl=AR" target="_blank" rel="noopener">Google Play</a> y <a href="https://apps.apple.com/ar/app/bax-la-ia-de-la-ciudad/id6755828845" target="_blank" rel="noopener">App Store</a> (29/09/2026); <a href="https://consensosalud.com.ar/la-ciudad-refuerza-la-linea-147-que-da-mas-de-10-mil-turnos-por-dia-en-hospitales-y-cesac/" target="_blank" rel="noopener">Consenso Salud</a> (147); <a href="https://buenosaires.gob.ar/noticias/bax-la-aplicacion-de-inteligencia-artificial-de-la-ciudad-ya-supero-las-110-mil-descargas" target="_blank" rel="noopener">Gobierno de la Ciudad</a> (BAX). No se reproducen nombres de usuarios. El análisis de temas es una lectura propia de una muestra.</footer>
+</section>
+
+<!-- ============ ESPECIALIDADES ============ -->
+<section class="pane" id="pane-e">
+  <div class="bar-row"><p>Dónde cuesta más conseguir atención, según lo que reconoce la Ciudad y lo que cuentan las reseñas. La Ciudad no publica datos de turnos no otorgados ni de listas de espera por especialidad: este es el faltante principal de la sección.</p></div>
+  <div class="kpis">
+    <div class="card"><div class="kl">Áreas con capacidad insuficiente</div><div class="kv">3</div><div class="kn">reconocidas por la Ciudad (jun. 2026)</div></div>
+    <div class="card"><div class="kl">Reseñas sobre falta de turnos</div><div class="kv" id="e-k1"></div><div class="kn">con especialidad identificable, de 436 leídas</div></div>
+    <div class="card"><div class="kl">Especialidades mencionadas</div><div class="kv" id="e-k2"></div><div class="kn">en esas reseñas</div></div>
+    <div class="card"><div class="kl">Datos oficiales de espera</div><div class="kv">No hay</div><div class="kn">no se publican: se pueden pedir por Ley 104</div></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px">Fuente 1 · Lo que reconoce la Ciudad</h3>
+  <div class="card" style="margin-bottom:14px"><div class="insights">
+    <div class="ins" style="border-color:var(--neg)"><b>Salud mental, oftalmología y odontología</b><p>Son las tres áreas en las que la Ciudad admitió que la oferta no alcanza para la demanda, en junio de 2026.</p></div>
+    <div class="ins" style="border-color:var(--mix)"><b>Refuerzos anunciados</b><p>60 odontopediatras y más de 40 profesionales de salud mental (psicología y psiquiatría), además de la extensión de horarios por la tarde.</p></div>
+    <div class="ins"><b>Por qué crece la demanda</b><p>Según la cobertura, familias de clase media y jubilados de PAMI que dejan prepagas y obras sociales pasan al sistema público. La Ciudad informa que el 70% de los turnos ya es para residentes porteños.</p></div>
+  </div><p class="hint" style="margin:10px 0 0">Fuentes: <a href="https://es-us.noticias.yahoo.com/pedido-hist%C3%B3rico-vigente-sistema-salud-090001372.html" target="_blank" rel="noopener">La Nación</a> y <a href="https://www.saberensalud.com.ar/modernizacion-sanitaria-en-caba-los-hospitales-portenos-extienden-su-atencion-ante-el-aumento-de-la-demanda/" target="_blank" rel="noopener">Saber en Salud</a> (29/06/2026), con datos del Gobierno de la Ciudad.</p></div>
+
+  <h3 style="margin:18px 0 8px">Fuente 2 · Qué cuentan las reseñas de Google</h3>
+  <div class="grid">
+    <div class="card s7"><h3>Reseñas que cuentan que no consiguieron turno o atención, por especialidad</h3><div class="hint">Cantidad de comentarios. En naranja, las áreas que la Ciudad reconoce como insuficientes.</div><div class="ch" style="height:360px"><canvas id="e-ch"></canvas></div></div>
+    <div class="card s5"><h3>Cómo leerlo</h3><div class="insights" style="grid-template-columns:1fr">
+      <div class="ins" style="border-color:var(--mix)"><b>Coinciden con lo oficial</b><p>Salud mental y odontología aparecen en las reseñas y también en lo que reconoce la Ciudad.</p></div>
+      <div class="ins"><b>El vacunatorio encabeza, pero por la temporada</b><p>Muchas reseñas son del otoño, en plena campaña de gripe: faltantes de vacunas, cupos diarios y turnos que no aparecen. No refleja necesariamente la demanda del resto del año.</p></div>
+      <div class="ins"><b>Clínica, pediatría y ginecología</b><p>Aparecen como filas desde la madrugada para pocos turnos del día, sobre todo en CeSAC.</p></div>
+      <div class="ins" style="border-color:var(--neu)"><b>Especialidades hospitalarias</b><p>Oftalmología, traumatología, gastroenterología, oncología y otorrino aparecen una vez cada una. Son casos, no tendencia.</p></div>
+    </div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:10px">Detalle por especialidad</h3>
+    <div class="tbl"><table><thead><tr><th style="cursor:default">Especialidad</th><th style="cursor:default">Reseñas</th><th style="cursor:default">Dónde</th><th style="cursor:default">Reconocida por la Ciudad</th></tr></thead><tbody id="e-tb"></tbody></table></div>
+    <p class="hint" style="margin:10px 0 0">Se contó una reseña cuando dice explícitamente que no consiguió turno, que no había cupo o insumos, o que le negaron la atención en esa especialidad. Una reseña puede nombrar más de una.</p>
+  </div>
+
+  <h3 style="margin:18px 0 8px">Qué falta para medirlo bien</h3>
+  <div class="card" style="margin-bottom:14px"><div class="prose" style="max-width:none">
+    <ul>
+      <li><b>Demanda atendida por especialidad:</b> el Instituto de Estadística de la Ciudad publica consultas externas en hospitales por grupo de especialidades (serie 2005–2019) y consultas en CeSAC (2017–2023). No se pudo acceder al sitio al armar esta sección (no respondía). Queda pendiente sumarlo.</li>
+      <li><b>Demanda no atendida:</b> turnos pedidos y no otorgados, días de espera y listas de espera por especialidad no se publican. Se pueden pedir por Ley 104 al Ministerio de Salud porteño, por especialidad, hospital o CeSAC, y mes.</li>
+      <li><b>Reclamos formales:</b> el dataset de la Defensoría del Pueblo en Buenos Aires Data tiene reclamos por turnos y acceso a la salud que podrían clasificarse por especialidad.</li>
+    </ul>
+  </div></div>
+  <footer>Las reseñas son una muestra de hasta 5 comentarios por establecimiento elegidos por Google, leídos y clasificados a mano: muestran casos, no miden la magnitud del problema. Los datos oficiales citados son declaraciones del Gobierno recogidas por la prensa.</footer>
+</section>
+
+<!-- ============ METODOLOGIA ============ -->
+<section class="pane" id="pane-x">
+  <div class="card"><div class="prose">
+    <h3 style="margin-top:0">Qué es el Observatorio en Salud</h3>
+    <p>Un análisis independiente y no oficial de la opinión ciudadana sobre la red pública de salud de la Ciudad de Buenos Aires, hecho con datos públicos. No representa al Gobierno de la Ciudad ni a ninguna institución.</p>
+    <h3>Qué se relevó</h3>
+    <ul>
+      <li><b>50 CeSAC</b> (Centros de Salud y Acción Comunitaria): primer nivel de atención.</li>
+      <li><b>3 CEMAR</b> (Centros Médicos Ambulatorios de Referencia): segundo nivel.</li>
+      <li><b>35 hospitales:</b> los 34 de la red porteña más el Garrahan, de gestión compartida Nación-Ciudad. No incluye hospitales nacionales ni privados.</li>
+    </ul>
+    <h3>Fuentes</h3>
+    <p>Detalle de cada fuente: qué se tomó, de dónde, cómo y cuándo.</p>
+
+    <h3 style="font-size:14px">1. Google Maps · base de casi todo el Observatorio</h3>
+    <div class="tbl"><table class="src-t"><tbody>
+      <tr><th>Qué se tomó</th><td class="wrap-td">Calificación promedio y cantidad de reseñas de la ficha de cada establecimiento, y hasta 5 comentarios por ficha</td></tr>
+      <tr><th>Cómo</th><td class="wrap-td">Búsqueda de lugares de Google (Places), un establecimiento por vez</td></tr>
+      <tr><th>Fecha</th><td class="wrap-td">24/09/2026 (CEMAR: 25/09/2026)</td></tr>
+      <tr><th>Alcance</th><td class="wrap-td">50 CeSAC, 3 CEMAR y 35 hospitales · 42.543 reseñas contadas · 436 comentarios leídos</td></tr>
+      <tr><th>Se usa en</th><td class="wrap-td">Todas las pestañas</td></tr>
+    </tbody></table></div>
+    <ul>
+      <li><b>Los comentarios no son al azar:</b> son los que Google muestra como "más relevantes".</li>
+      <li><b>Traducción:</b> la herramienta de búsqueda los entregó traducidos al inglés y se clasificaron desde esa versión.</li>
+      <li><b>La clasificación es una lectura propia:</b> el tono y los temas se asignaron a mano al leer cada comentario.</li>
+      <li><b>Fichas duplicadas:</b> cuando un centro tenía más de una ficha (CeSAC 2, 5, 8, 14, 17 y 22/CEMAR 1), se usó la principal.</li>
+      <li><b>Lista de establecimientos:</b> se armó buscando los CeSAC por número y los hospitales por nombre. Todavía no se cruzó con el listado oficial de la Ciudad, así que puede faltar alguno (por ejemplo, el CeSAC 51, abierto en septiembre de 2026, no está incluido).</li>
+    </ul>
+
+    <h3 style="font-size:14px">2. Prensa · pestaña CeSAC</h3>
+    <p>Notas encontradas por búsqueda web, publicadas desde septiembre de 2024. Se excluyeron medios de partidos políticos de izquierda y notas sin fecha.</p>
+    <div class="tbl"><table class="src-t"><thead><tr><th>Nota</th><th>Medio</th><th>Fecha</th></tr></thead><tbody>
+      <tr><td class="wrap-td">Crisis en la farmacia del CeSAC 34</td><td><a href="https://vinculosvecinales.com.ar/explota-el-cesac-34/" target="_blank" rel="noopener">Vínculos Vecinales</a></td><td>abr. 2025</td></tr>
+      <tr><td class="wrap-td">Refuerzo de la línea 147</td><td><a href="https://consensosalud.com.ar/la-ciudad-refuerza-la-linea-147-que-da-mas-de-10-mil-turnos-por-dia-en-hospitales-y-cesac/" target="_blank" rel="noopener">Consenso Salud</a></td><td>nov. 2025</td></tr>
+      <tr><td class="wrap-td">Apertura del CEMAR 3 con prioridad para porteños</td><td><a href="https://www.infobae.com/politica/2026/03/11/abrio-un-centro-de-salud-en-caba-con-prioridad-de-atencion-para-los-portenos-caba-no-sera-mas-la-prepaga-gratuita-de-ningun-extranjero/" target="_blank" rel="noopener">Infobae</a></td><td>mar. 2026</td></tr>
+      <tr><td class="wrap-td">Apertura del CeSAC 51</td><td><a href="https://www.infoban.com.ar/24/09/2026/la-ciudad-transformo-un-viejo-galpon-ferroviario-en-un-nuevo-centro-de-salud-en-colegiales/" target="_blank" rel="noopener">InfoBAN</a></td><td>sep. 2026</td></tr>
+    </tbody></table></div>
+
+    <h3 style="font-size:14px">3. Reseñas de la app BAX · pestaña Turnos</h3>
+    <div class="tbl"><table class="src-t"><thead><tr><th></th><th><a href="https://play.google.com/store/apps/details?id=com.gcba.bax&hl=es_AR&gl=AR" target="_blank" rel="noopener">Google Play</a></th><th><a href="https://apps.apple.com/ar/app/bax-la-ia-de-la-ciudad/id6755828845" target="_blank" rel="noopener">App Store</a></th></tr></thead><tbody>
+      <tr><th>Calificación</th><td>1,6 ★ (482 opiniones de teléfono)</td><td>4,7 ★ (97 calificaciones)</td></tr>
+      <tr><th>Comentarios leídos</th><td class="wrap-td">Las 20 "más relevantes"</td><td class="wrap-td">Las 4 visibles en la página</td></tr>
+      <tr><th>Cómo</th><td class="wrap-td">Lectura de la página pública, con la tienda configurada en Argentina</td><td class="wrap-td">Lectura de la página pública</td></tr>
+      <tr><th>Fecha</th><td>29/09/2026</td><td>29/09/2026</td></tr>
+    </tbody></table></div>
+    <p class="hint">De las opiniones solo se registró la fecha, las estrellas y el tema. No se guardaron nombres de usuarios.</p>
+
+    <h3 style="font-size:14px">4. Datos oficiales · pestaña Turnos</h3>
+    <div class="tbl"><table class="src-t"><thead><tr><th>Dato</th><th>Fuente</th><th>Fecha</th></tr></thead><tbody>
+      <tr><td class="wrap-td">~10 mil turnos de salud por día y más de 300 operadores del 147</td><td class="wrap-td">Gobierno de la Ciudad, publicado por <a href="https://consensosalud.com.ar/la-ciudad-refuerza-la-linea-147-que-da-mas-de-10-mil-turnos-por-dia-en-hospitales-y-cesac/" target="_blank" rel="noopener">Consenso Salud</a></td><td>nov. 2025</td></tr>
+      <tr><td class="wrap-td">Más de 110 mil usuarios de BAX</td><td class="wrap-td"><a href="https://buenosaires.gob.ar/noticias/bax-la-aplicacion-de-inteligencia-artificial-de-la-ciudad-ya-supero-las-110-mil-descargas" target="_blank" rel="noopener">Gobierno de la Ciudad</a></td><td>sep. 2026</td></tr>
+    </tbody></table></div>
+    <p class="hint">Son cifras del propio Gobierno y no fueron verificadas por otra vía.</p>
+
+    <h3 style="font-size:14px">5. Demanda por especialidad · pestaña Especialidades</h3>
+    <ul>
+      <li><b>Áreas con capacidad insuficiente y refuerzos anunciados:</b> Gobierno de la Ciudad, recogido por <a href="https://es-us.noticias.yahoo.com/pedido-hist%C3%B3rico-vigente-sistema-salud-090001372.html" target="_blank" rel="noopener">La Nación</a> y <a href="https://www.saberensalud.com.ar/modernizacion-sanitaria-en-caba-los-hospitales-portenos-extienden-su-atencion-ante-el-aumento-de-la-demanda/" target="_blank" rel="noopener">Saber en Salud</a> (29/06/2026).</li>
+      <li><b>Reseñas por especialidad:</b> de los mismos 436 comentarios de Google Maps, se contaron los que dicen explícitamente que no consiguieron turno, cupo, insumos o atención en una especialidad (lectura propia, 29/09/2026).</li>
+      <li><b>Pendiente:</b> consultas externas por especialidad del Instituto de Estadística de la Ciudad (el sitio no respondía el 29/09/2026).</li>
+    </ul>
+
+    <h3 style="font-size:14px">6. Contexto (no aparece en gráficos)</h3>
+    <ul>
+      <li><b>Qué son los CEMAR</b> y qué especialidades tienen: <a href="https://buenosaires.gob.ar/gcaba_historico/noticias/la-ciudad-fortalece-el-primer-nivel-de-atencion-con-la-inauguracion-del" target="_blank" rel="noopener">Gobierno de la Ciudad</a> y <a href="https://www.lanacion.com.ar/sociedad/ciudad-un-nuevo-centro-gratuito-de-especialidades-medicas-acerca-servicios-cruciales-a-los-vecinos-nid24022026/" target="_blank" rel="noopener">La Nación</a> (feb. 2026).</li>
+      <li><b>Cantidad de CeSAC en la Ciudad</b> (50): <a href="https://www.lanacion.com.ar/sociedad/listado-completo-todos-los-hospitales-y-centros-de-salud-gratis-de-caba-nid13102025/" target="_blank" rel="noopener">La Nación</a> (oct. 2025).</li>
+    </ul>
+
+    <h3>Cómo se analizaron los comentarios</h3>
+    <p>De cada establecimiento se leyeron hasta 5 comentarios (436 en total). Cada uno se clasificó a mano según su tono (positivo, negativo, mixto o neutro) y según los temas que menciona: recepción, profesionales, enfermería, guardia, farmacia, turnos y esperas, teléfono, instalaciones y seguridad. Un comentario puede tocar varios temas.</p>
+    <h3>Limitaciones</h3>
+    <ul>
+      <li>La muestra de comentarios es chica y no es aleatoria: sirve para ver tendencias, no para medir con precisión.</li>
+      <li>Los comentarios leídos son los que Google elige como "más relevantes", no una muestra al azar.</li>
+      <li>La lista de establecimientos todavía no está verificada contra el listado oficial de la Ciudad.</li>
+      <li>Quienes dejan reseñas en Google no representan a todos los usuarios: suelen opinar más quienes tuvieron experiencias muy buenas o muy malas.</li>
+      <li>En los hospitales generales, las reseñas mezclan guardia, consultorios e internación.</li>
+      <li>Barrios y zonas son aproximados.</li>
+    </ul>
+    <h3>Uso de los datos</h3>
+    <p>Los datos provienen de Google Maps y se citan como fuente. El Observatorio no reproduce reseñas textuales ni identifica a personas.</p>
+  </div></div>
+</section>
+</div>
+
+<script>
+const CESAC = [{"n": 1, "r": 3.9, "c": 51, "b": "Barracas / Parque Patricios", "z": "Sur", "s": ["P", "N", "M", "O", "P"], "t": {"PRO": [2, 0], "REC": [2, 0], "SEG": [1, 0], "ACC": [0, 2]}}, {"n": 2, "r": 3.4, "c": 213, "b": "Villa Pueyrredón", "z": "Norte", "s": ["P", "M", "M", "N", "O"], "t": {"INS": [1, 0], "PRO": [3, 0], "ACC": [1, 1], "REC": [1, 1], "ENF": [0, 1]}}, {"n": 3, "r": 4.0, "c": 95, "b": "Villa Lugano", "z": "Sur", "s": ["N", "N", "P", "P", "M"], "t": {"FAR": [0, 2], "REC": [2, 2], "ACC": [0, 1], "PRO": [1, 0], "ENF": [1, 1]}}, {"n": 4, "r": 3.6, "c": 161, "b": "Mataderos", "z": "Oeste", "s": ["M", "P", "P", "M", "O"], "t": {"REC": [3, 0], "PRO": [2, 0], "FAR": [0, 2], "ACC": [0, 2]}}, {"n": 5, "r": 4.0, "c": 79, "b": "Villa Lugano", "z": "Sur", "s": ["N", "N", "N", "N", "N"], "t": {"REC": [0, 5], "PRO": [0, 1], "ACC": [0, 1]}}, {"n": 6, "r": 3.1, "c": 36, "b": "Villa Soldati", "z": "Sur", "s": ["N", "N", "N", "N", "N"], "t": {"ACC": [0, 2], "TEL": [0, 2], "REC": [0, 4], "SEG": [0, 1]}}, {"n": 7, "r": 3.9, "c": 100, "b": "Villa Lugano", "z": "Sur", "s": ["N", "N", "P", "P", "P"], "t": {"FAR": [0, 1], "ACC": [0, 1], "PRO": [3, 0], "INS": [1, 0]}}, {"n": 8, "r": 4.1, "c": 11, "b": "Barracas (Barrio 21-24)", "z": "Sur", "s": ["M", "P", "P", "P", "P"], "t": {"FAR": [0, 1], "PRO": [1, 0], "REC": [2, 0], "INS": [1, 0]}}, {"n": 9, "r": 4.1, "c": 78, "b": "La Boca", "z": "Sur", "s": ["P", "P", "N", "O", "P"], "t": {"PRO": [2, 0], "ENF": [1, 0], "TEL": [0, 1]}}, {"n": 10, "r": 3.6, "c": 77, "b": "Barracas", "z": "Sur", "s": ["P", "N", "P", "N", "P"], "t": {"ENF": [1, 0], "TEL": [0, 1], "REC": [0, 1], "PRO": [1, 0], "ACC": [0, 1]}}, {"n": 11, "r": 2.6, "c": 199, "b": "Almagro", "z": "Centro", "s": ["P", "N", "M", "N", "N"], "t": {"REC": [2, 3], "ACC": [0, 2]}}, {"n": 12, "r": 3.3, "c": 327, "b": "Villa Urquiza", "z": "Norte", "s": ["M", "N", "N", "N", "N"], "t": {"PRO": [1, 2], "REC": [2, 1], "SEG": [1, 0], "FAR": [0, 1], "ENF": [0, 2], "TEL": [0, 1], "ACC": [0, 1]}}, {"n": 13, "r": 3.3, "c": 154, "b": "Parque Avellaneda", "z": "Oeste", "s": ["N", "N", "P", "N", "N"], "t": {"ACC": [0, 4], "ENF": [0, 1], "REC": [1, 2], "SEG": [1, 0], "FAR": [1, 0], "PRO": [1, 0]}}, {"n": 14, "r": 3.5, "c": 41, "b": "Villa Lugano", "z": "Sur", "s": ["N", "P", "M", "N", "M"], "t": {"REC": [0, 2], "ACC": [0, 2], "SEG": [1, 0], "ENF": [2, 1], "TEL": [0, 1], "PRO": [1, 0]}}, {"n": 15, "r": 3.8, "c": 234, "b": "San Telmo", "z": "Centro", "s": ["N", "M", "N", "N", "N"], "t": {"PRO": [0, 1], "REC": [1, 2], "ENF": [1, 1], "INS": [1, 0], "SEG": [0, 1], "ACC": [0, 2], "TEL": [0, 1]}}, {"n": 16, "r": 3.9, "c": 96, "b": "Barracas", "z": "Sur", "s": ["P", "P", "P", "N", "P"], "t": {"REC": [2, 0], "ENF": [1, 0], "INS": [1, 0], "PRO": [3, 0], "ACC": [0, 1]}}, {"n": 17, "r": 4.0, "c": 176, "b": "Palermo", "z": "Norte", "s": ["P", "P", "N", "P", "P"], "t": {"PRO": [1, 0], "ENF": [4, 0], "FAR": [0, 1], "INS": [1, 0]}}, {"n": 18, "r": 3.8, "c": 27, "b": "Villa Soldati", "z": "Sur", "s": ["P", "N", "N", "P", "N"], "t": {"ENF": [1, 0], "PRO": [0, 1], "ACC": [0, 1], "REC": [0, 1], "SEG": [0, 1]}}, {"n": 19, "r": 3.9, "c": 101, "b": "Flores Sur", "z": "Sur", "s": ["M", "M", "N", "P", "N"], "t": {"PRO": [1, 1], "FAR": [0, 2], "ACC": [0, 2], "TEL": [1, 0]}}, {"n": 20, "r": 3.8, "c": 4, "b": "Flores Sur", "z": "Sur", "s": ["N", "P"], "t": {"ACC": [0, 1]}}, {"n": 21, "r": 3.1, "c": 25, "b": "Retiro (Barrio 31)", "z": "Centro", "s": ["N", "M", "P", "N", "N"], "t": {"ACC": [0, 1], "REC": [0, 2], "SEG": [1, 0], "PRO": [2, 0], "TEL": [0, 2], "FAR": [0, 1]}}, {"n": 22, "r": 3.3, "c": 271, "b": "Villa Gral. Mitre", "z": "Oeste", "s": ["N", "N", "P", "N", "N"], "t": {"FAR": [0, 1], "REC": [0, 2], "TEL": [0, 2], "ACC": [0, 1], "PRO": [1, 0], "INS": [1, 0]}}, {"n": 23, "r": 3.8, "c": 111, "b": "Villa Luro", "z": "Oeste", "s": ["N", "N", "P", "N", "P"], "t": {"REC": [1, 3], "SEG": [1, 1], "PRO": [1, 0], "ACC": [0, 2], "INS": [1, 0], "ENF": [1, 0], "FAR": [1, 1]}}, {"n": 24, "r": 4.2, "c": 30, "b": "Villa Soldati", "z": "Sur", "s": ["N", "O", "P", "O", "P"], "t": {"SEG": [0, 2], "TEL": [0, 1], "PRO": [2, 0]}}, {"n": 25, "r": 4.0, "c": 12, "b": "Retiro (Barrio 31)", "z": "Centro", "s": ["P", "N", "P", "M", "O"], "t": {"REC": [1, 2], "ACC": [0, 1], "PRO": [1, 0]}}, {"n": 26, "r": 3.3, "c": 255, "b": "Palermo", "z": "Norte", "s": ["P", "P", "N", "P", "N"], "t": {"REC": [2, 2], "PRO": [2, 0], "ENF": [1, 1], "SEG": [2, 0], "INS": [1, 0], "FAR": [0, 1]}}, {"n": 27, "r": 3.9, "c": 160, "b": "Saavedra", "z": "Norte", "s": ["N", "P", "N", "N", "N"], "t": {"REC": [0, 2], "FAR": [0, 2], "ENF": [1, 0], "TEL": [0, 1], "ACC": [0, 1]}}, {"n": 28, "r": 3.9, "c": 39, "b": "Villa Lugano", "z": "Sur", "s": ["P", "P", "N", "P", "M"], "t": {"REC": [2, 2], "ENF": [1, 1], "INS": [1, 0], "PRO": [2, 0], "TEL": [0, 1]}}, {"n": 29, "r": 3.6, "c": 33, "b": "Villa Lugano (INTA)", "z": "Sur", "s": ["P", "N", "O", "O", "N"], "t": {"ACC": [0, 2], "REC": [0, 2], "PRO": [1, 0]}}, {"n": 30, "r": 4.0, "c": 36, "b": "Nueva Pompeya", "z": "Sur", "s": ["N", "O", "N", "N", "P"], "t": {"ENF": [0, 1], "ACC": [0, 1], "TEL": [0, 1], "FAR": [0, 1]}}, {"n": 31, "r": 4.1, "c": 14, "b": "Flores Sur", "z": "Sur", "s": ["P", "P", "P", "P", "P"], "t": {"PRO": [3, 0], "SEG": [1, 0]}}, {"n": 32, "r": 4.5, "c": 46, "b": "Villa Soldati", "z": "Sur", "s": ["P", "P", "N", "P", "P"], "t": {"PRO": [1, 0], "ENF": [3, 0], "FAR": [1, 0], "REC": [0, 1], "TEL": [0, 1]}}, {"n": 33, "r": 4.0, "c": 335, "b": "Palermo / Villa Crespo", "z": "Norte", "s": ["P", "P", "N", "P", "M"], "t": {"PRO": [3, 1], "ACC": [0, 2], "ENF": [1, 0], "FAR": [0, 1]}}, {"n": 34, "r": 3.7, "c": 178, "b": "Floresta", "z": "Oeste", "s": ["P", "P", "M", "P", "M"], "t": {"PRO": [1, 0], "REC": [1, 0], "ACC": [0, 3], "ENF": [1, 0], "FAR": [0, 1]}}, {"n": 35, "r": 4.2, "c": 55, "b": "Barracas (Zavaleta)", "z": "Sur", "s": ["N", "P", "N", "P", "P"], "t": {"FAR": [0, 2], "ACC": [0, 2], "PRO": [2, 0], "ENF": [1, 0]}}, {"n": 36, "r": 3.3, "c": 195, "b": "Floresta / Vélez Sarsfield", "z": "Oeste", "s": ["N", "P", "N", "N", "P"], "t": {"REC": [1, 3], "ACC": [0, 1], "ENF": [0, 1], "PRO": [1, 0]}}, {"n": 37, "r": 4.0, "c": 177, "b": "Mataderos", "z": "Oeste", "s": ["O", "N", "M", "N", "M"], "t": {"REC": [0, 3], "PRO": [1, 0], "ACC": [0, 1], "TEL": [0, 1], "ENF": [1, 1], "SEG": [1, 0]}}, {"n": 38, "r": 3.1, "c": 290, "b": "Almagro", "z": "Centro", "s": ["P", "N", "N", "M", "N"], "t": {"PRO": [1, 0], "INS": [1, 1], "TEL": [0, 1], "ACC": [0, 1], "ENF": [1, 1], "REC": [0, 2], "SEG": [0, 1]}}, {"n": 39, "r": 3.9, "c": 207, "b": "San Cristóbal", "z": "Centro", "s": ["N", "P", "O", "P", "P"], "t": {"FAR": [0, 2], "ENF": [2, 0], "TEL": [1, 0]}}, {"n": 40, "r": 4.0, "c": 30, "b": "Flores Sur", "z": "Sur", "s": ["M", "P", "P", "P", "N"], "t": {"PRO": [3, 0], "REC": [0, 1], "ENF": [0, 1]}}, {"n": 41, "r": 4.1, "c": 57, "b": "La Boca", "z": "Sur", "s": ["P", "P", "N", "P", "N"], "t": {"ENF": [3, 1], "PRO": [1, 0], "ACC": [0, 1], "FAR": [0, 1], "REC": [0, 1]}}, {"n": 42, "r": 4.3, "c": 102, "b": "Parque Patricios / Boedo", "z": "Centro", "s": ["P", "M", "N", "P", "M"], "t": {"REC": [1, 2], "PRO": [2, 0], "INS": [2, 0], "FAR": [1, 1], "ENF": [1, 1]}}, {"n": 43, "r": 4.2, "c": 33, "b": "Villa Lugano", "z": "Sur", "s": ["O", "P", "P", "N", "P"], "t": {"ENF": [1, 0], "FAR": [0, 1], "PRO": [1, 0]}}, {"n": 44, "r": 3.9, "c": 104, "b": "Villa Lugano", "z": "Sur", "s": ["O", "P", "N", "P", "O"], "t": {"REC": [2, 0], "ENF": [0, 1], "ACC": [1, 0]}}, {"n": 45, "r": 3.4, "c": 234, "b": "San Cristóbal", "z": "Centro", "s": ["P", "N", "P", "N", "M"], "t": {"PRO": [2, 0], "REC": [1, 2], "INS": [1, 0], "FAR": [0, 1], "ACC": [0, 1]}}, {"n": 46, "r": 4.2, "c": 43, "b": "Barracas", "z": "Sur", "s": ["P", "P", "N", "P", "P"], "t": {"PRO": [2, 1], "REC": [2, 0], "ENF": [2, 0], "ACC": [0, 2], "INS": [2, 0]}}, {"n": 47, "r": 3.6, "c": 20, "b": "Retiro (Barrio 31)", "z": "Centro", "s": ["P", "N", "N", "N", "P"], "t": {"ENF": [1, 0], "TEL": [0, 1], "INS": [0, 1], "ACC": [0, 2]}}, {"n": 48, "r": 4.3, "c": 34, "b": "Villa Soldati", "z": "Sur", "s": ["N", "N", "O", "P", "P"], "t": {"REC": [0, 1]}}, {"n": 49, "r": 4.7, "c": 15, "b": "Barracas (Riachuelo)", "z": "Sur", "s": ["P", "P", "P", "P"], "t": {"PRO": [1, 0]}}, {"n": 50, "r": 4.4, "c": 74, "b": "Villa Real / Versalles", "z": "Oeste", "s": ["P", "P", "P", "P", "N"], "t": {"ENF": [3, 1], "REC": [3, 0], "ACC": [2, 1], "INS": [3, 0]}}];
+const HOSP = [{"n": "Argerich", "g": "Agudos", "b": "La Boca", "z": "Sur", "r": 3.6, "c": 1407, "s": ["P", "O", "N", "N", "N"], "t": {"GUA": [1, 2], "PRO": [1, 3]}}, {"n": "Álvarez", "g": "Agudos", "b": "Flores", "z": "Oeste", "r": 3.6, "c": 1437, "s": ["N", "O", "O", "N", "M"], "t": {"INS": [1, 2], "REC": [0, 1], "PRO": [0, 2]}}, {"n": "Durand", "g": "Agudos", "b": "Caballito", "z": "Centro", "r": 3.5, "c": 1823, "s": ["P", "P", "P", "P", "O"], "t": {"GUA": [2, 0], "PRO": [2, 0], "ENF": [1, 0], "REC": [1, 0], "INS": [0, 1]}}, {"n": "Fernández", "g": "Agudos", "b": "Palermo", "z": "Norte", "r": 3.5, "c": 1848, "s": ["P", "P", "P", "P", "M"], "t": {"PRO": [1, 0], "ENF": [2, 0], "GUA": [1, 0], "ACC": [1, 1]}}, {"n": "Penna", "g": "Agudos", "b": "Parque Patricios", "z": "Sur", "r": 3.3, "c": 800, "s": ["P", "N", "N", "P", "N"], "t": {"PRO": [2, 2], "GUA": [0, 2], "INS": [0, 1], "ACC": [0, 1]}}, {"n": "Piñero", "g": "Agudos", "b": "Flores Sur", "z": "Sur", "r": 3.4, "c": 952, "s": ["N", "P", "P", "M", "N"], "t": {"GUA": [0, 2], "PRO": [1, 0], "REC": [1, 1], "ENF": [2, 1], "INS": [0, 1]}}, {"n": "Pirovano", "g": "Agudos", "b": "Coghlan", "z": "Norte", "r": 3.2, "c": 1529, "s": ["P", "P", "P", "O", "O"], "t": {"GUA": [2, 0], "REC": [1, 0], "ENF": [1, 0], "PRO": [1, 0]}}, {"n": "Ramos Mejía", "g": "Agudos", "b": "Balvanera", "z": "Centro", "r": 3.5, "c": 1597, "s": ["P", "N", "P", "M", "M"], "t": {"ACC": [1, 1], "INS": [0, 2], "PRO": [0, 1], "ENF": [0, 1]}}, {"n": "Rivadavia", "g": "Agudos", "b": "Palermo", "z": "Norte", "r": 3.7, "c": 1361, "s": ["N", "N", "P", "O", "M"], "t": {"GUA": [0, 1], "INS": [0, 2], "REC": [1, 1], "PRO": [1, 0]}}, {"n": "Santojanni", "g": "Agudos", "b": "Liniers", "z": "Oeste", "r": 3.6, "c": 1360, "s": ["O", "N", "P", "P", "M"], "t": {"GUA": [0, 1], "REC": [0, 1], "ACC": [1, 0], "PRO": [2, 0], "INS": [0, 1]}}, {"n": "Tornú", "g": "Agudos", "b": "Parque Chas", "z": "Norte", "r": 3.8, "c": 1123, "s": ["O", "N", "P", "M", "N"], "t": {"ENF": [1, 1], "GUA": [1, 2], "PRO": [1, 0], "SEG": [0, 1], "REC": [0, 1]}}, {"n": "Vélez Sarsfield", "g": "Agudos", "b": "Monte Castro", "z": "Oeste", "r": 3.5, "c": 1092, "s": ["N", "N", "N", "N", "P"], "t": {"REC": [0, 3], "GUA": [0, 3], "PRO": [1, 1]}}, {"n": "Zubizarreta", "g": "Agudos", "b": "Villa Devoto", "z": "Oeste", "r": 3.2, "c": 1111, "s": ["O", "P", "N", "P", "M"], "t": {"GUA": [0, 2], "ENF": [0, 1], "PRO": [2, 1], "ACC": [1, 1]}}, {"n": "Grierson", "g": "Agudos", "b": "Villa Lugano", "z": "Sur", "r": 2.9, "c": 627, "s": ["N", "N", "M", "N", "N"], "t": {"GUA": [0, 2], "REC": [0, 2], "ACC": [0, 3], "PRO": [0, 2], "INS": [1, 0], "ENF": [0, 1]}}, {"n": "Gutiérrez (Niños)", "g": "Pediátrico / materno", "b": "Recoleta", "z": "Norte", "r": 4.3, "c": 1794, "s": ["M", "N", "P", "M", "O"], "t": {"PRO": [2, 0], "INS": [0, 2], "GUA": [0, 1]}}, {"n": "Elizalde (Niños)", "g": "Pediátrico / materno", "b": "Barracas", "z": "Sur", "r": 4.3, "c": 1041, "s": ["P", "P", "N", "P", "P"], "t": {"ENF": [2, 0], "PRO": [4, 0], "GUA": [1, 1]}}, {"n": "Sardá (Materno Infantil)", "g": "Pediátrico / materno", "b": "Parque Patricios", "z": "Sur", "r": 4.1, "c": 793, "s": ["P", "P", "P", "P", "N"], "t": {"ENF": [3, 0], "PRO": [4, 0], "ACC": [0, 1], "SEG": [0, 1]}}, {"n": "Garrahan (Nación-Ciudad)", "g": "Pediátrico / materno", "b": "Parque Patricios", "z": "Sur", "r": 4.6, "c": 3226, "s": ["N", "P", "P", "P", "P"], "t": {"PRO": [2, 0], "ENF": [1, 0]}}, {"n": "Muñiz (Infecciosas)", "g": "Especializado", "b": "Parque Patricios", "z": "Sur", "r": 4.3, "c": 1025, "s": ["P", "P", "P", "P", "M"], "t": {"ENF": [1, 0], "ACC": [1, 0], "PRO": [2, 0], "INS": [0, 1]}}, {"n": "Udaondo (Gastroenterología)", "g": "Especializado", "b": "Parque Patricios", "z": "Sur", "r": 3.6, "c": 1083, "s": ["P", "N", "N", "P", "N"], "t": {"PRO": [2, 1], "GUA": [1, 3], "ENF": [1, 0], "ACC": [0, 1]}}, {"n": "Santa Lucía (Oftalmología)", "g": "Especializado", "b": "San Cristóbal", "z": "Centro", "r": 4.0, "c": 2070, "s": ["M", "P", "O", "P", "P"], "t": {"ACC": [0, 1], "PRO": [2, 0], "GUA": [1, 0]}}, {"n": "Lagleyze (Oftalmología)", "g": "Especializado", "b": "Villa Gral. Mitre", "z": "Oeste", "r": 4.0, "c": 1334, "s": ["O", "O", "P", "N", "N"], "t": {"PRO": [0, 2], "GUA": [0, 2], "REC": [0, 1]}}, {"n": "Quemados", "g": "Especializado", "b": "Caballito", "z": "Centro", "r": 4.4, "c": 763, "s": ["P", "P", "P", "N", "P"], "t": {"GUA": [1, 1], "ENF": [3, 0], "PRO": [3, 1], "ACC": [2, 0], "REC": [2, 0]}}, {"n": "Marie Curie (Oncología)", "g": "Especializado", "b": "Caballito", "z": "Centro", "r": 4.3, "c": 691, "s": ["O", "O", "O", "N", "P"], "t": {"ENF": [0, 1], "SEG": [0, 1], "ACC": [0, 1], "GUA": [0, 1], "REC": [1, 0], "PRO": [1, 0]}}, {"n": "Rocca (Rehabilitación)", "g": "Especializado", "b": "Versalles", "z": "Oeste", "r": 4.1, "c": 270, "s": ["O", "O", "O", "P", "P"], "t": {"PRO": [2, 0], "REC": [1, 0], "ENF": [1, 0], "INS": [1, 0]}}, {"n": "Ferrer (Rehab. respiratoria)", "g": "Especializado", "b": "Barracas", "z": "Sur", "r": 4.3, "c": 570, "s": ["M", "P", "N", "P", "N"], "t": {"PRO": [3, 0], "ENF": [1, 0], "SEG": [0, 3], "REC": [0, 1], "GUA": [1, 1]}}, {"n": "IREP (Rehabilitación)", "g": "Especializado", "b": "Belgrano", "z": "Norte", "r": 4.5, "c": 437, "s": ["P", "O", "P", "M", "P"], "t": {"ACC": [1, 1], "INS": [1, 0], "PRO": [2, 0]}}, {"n": "Borda", "g": "Salud mental", "b": "Barracas", "z": "Sur", "r": 3.7, "c": 194, "s": ["P", "P", "P", "P", "O"], "t": {"PRO": [1, 0], "SEG": [1, 0]}}, {"n": "Moyano", "g": "Salud mental", "b": "Barracas", "z": "Sur", "r": 3.9, "c": 308, "s": ["N", "O", "O", "P", "N"], "t": {"INS": [0, 1], "PRO": [1, 0], "GUA": [1, 0], "ACC": [0, 1]}}, {"n": "Alvear (Emergencias psiquiátricas)", "g": "Salud mental", "b": "La Paternal", "z": "Oeste", "r": 3.6, "c": 227, "s": ["O", "P", "P", "P", "M"], "t": {"PRO": [3, 1], "GUA": [0, 1]}}, {"n": "Tobar García (Infanto juvenil)", "g": "Salud mental", "b": "Barracas", "z": "Sur", "r": 3.9, "c": 164, "s": ["N", "N", "P", "O", "N"], "t": {"PRO": [1, 2], "REC": [0, 1]}}, {"n": "Ameghino (CSM 3)", "g": "Salud mental", "b": "Almagro", "z": "Centro", "r": 3.8, "c": 188, "s": ["N", "O", "N", "O", "P"], "t": {"TEL": [0, 3], "PRO": [1, 0]}}, {"n": "Dueñas (Odontología)", "g": "Odontológico", "b": "Almagro", "z": "Centro", "r": 3.6, "c": 1065, "s": ["P", "N", "N", "P", "N"], "t": {"GUA": [2, 1], "PRO": [1, 3], "ACC": [0, 1]}}, {"n": "Quinquela Martín (Odont. infantil)", "g": "Odontológico", "b": "La Boca", "z": "Sur", "r": 4.3, "c": 591, "s": ["P", "P", "N", "P", "P"], "t": {"ACC": [1, 1], "REC": [1, 1], "PRO": [1, 0], "SEG": [1, 0], "INS": [1, 0], "GUA": [1, 0]}}, {"n": "Carrillo (Odontología)", "g": "Odontológico", "b": "Palermo", "z": "Norte", "r": 4.2, "c": 811, "s": ["P", "N", "N", "N", "P"], "t": {"PRO": [2, 1], "TEL": [0, 1], "REC": [1, 1], "GUA": [1, 0]}}];
+const CEMAR = [{"n": "CEMAR 1", "b": "La Paternal (junto al CeSAC 22)", "z": "Oeste", "r": 4.1, "c": 105, "s": ["P", "N", "P", "N", "P"], "t": {"PRO": [2, 1], "ACC": [0, 2], "SEG": [0, 1], "REC": [2, 0], "INS": [1, 0], "TEL": [0, 1]}}, {"n": "CEMAR 2", "b": "Barracas / Nueva Pompeya", "z": "Sur", "r": 4.2, "c": 188, "s": ["O", "O", "P", "P", "M"], "t": {"INS": [1, 1], "ACC": [2, 0]}}, {"n": "CEMAR 3", "b": "Villa Urquiza (inaugurado feb. 2026)", "z": "Norte", "r": 4.7, "c": 63, "s": ["P", "P", "P", "P", "P"], "t": {"INS": [3, 0], "REC": [1, 0], "PRO": [3, 0], "ACC": [3, 0], "TEL": [1, 0]}}];
+const PRESS = [{"n": [34], "y": "2025", "t": "Farmacia y medicamentos", "titulo": "Crisis en la farmacia del CeSAC 34", "res": "Tras una agresión al personal, trabajadores y vecinos expusieron que la farmacia estaba desbordada por falta de personal y que el edificio queda chico para la demanda.", "f": "Vínculos Vecinales (abr. 2025)", "u": "https://vinculosvecinales.com.ar/explota-el-cesac-34/"}, {"n": [], "y": "2025", "t": "Turnos y teléfono", "titulo": "La Ciudad refuerza la línea 147", "res": "Nuevo call center con más de 300 operadores integrado al sistema de salud; unos 10 mil turnos por día en hospitales y CeSAC.", "f": "Consenso Salud (nov. 2025)", "u": "https://consensosalud.com.ar/la-ciudad-refuerza-la-linea-147-que-da-mas-de-10-mil-turnos-por-dia-en-hospitales-y-cesac/"}, {"n": [], "y": "2026", "t": "Acceso y prioridad de residentes", "titulo": "Abre el CEMAR 3 con prioridad para porteños", "res": "El Gobierno inauguró el CEMAR 3 (Galván 3463), un centro de especialidades para las comunas 12 y 13, y anunció prioridad de atención para residentes.", "f": "Infobae (mar. 2026)", "u": "https://www.infobae.com/politica/2026/03/11/abrio-un-centro-de-salud-en-caba-con-prioridad-de-atencion-para-los-portenos-caba-no-sera-mas-la-prepaga-gratuita-de-ningun-extranjero/"}, {"n": [51], "y": "2026", "t": "Nuevos centros", "titulo": "Abre el CeSAC 51 en Colegiales", "res": "Funciona en un ex galpón ferroviario (Moldes y Zabala); es el cuarto centro que abre la gestión actual. Todavía no tiene reseñas suficientes en Google.", "f": "InfoBAN (sep. 2026)", "u": "https://www.infoban.com.ar/24/09/2026/la-ciudad-transformo-un-viejo-galpon-ferroviario-en-un-nuevo-centro-de-salud-en-colegiales/"}];
+const PCOL={"Farmacia y medicamentos":"#dc2626","Turnos y teléfono":"#64748b","Acceso y prioridad de residentes":"#d97706","Nuevos centros":"#0f766e"};
+const THEMES = {REC:"Recepción / admisión",PRO:"Médicos y profesionales",ENF:"Enfermería / vacunatorio",GUA:"Guardia / emergencias",FAR:"Farmacia / medicación",ACC:"Turnos, cupos y esperas",TEL:"Teléfono e información",INS:"Instalaciones y limpieza",SEG:"Seguridad / vigilancia"};
+const GCOL = {"Agudos":"#2563eb","Pediátrico / materno":"#db2777","Especializado":"#0f766e","Salud mental":"#7c3aed","Odontológico":"#d97706"};
+const ZONES=['Sur','Oeste','Centro','Norte'];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const zc = z => css('--'+z.toLowerCase());
+const $ = id => document.getElementById(id);
+const fmt = v => v.toFixed(2).replace('.',',');
+
+function wavg(a){const t=a.reduce((s,d)=>s+d.c,0);return t?a.reduce((s,d)=>s+d.r*d.c,0)/t:0}
+function negPct(d){const k=d.s.filter(x=>x!=='O');return k.length?Math.round(100*k.filter(x=>x==='N').length/k.length):0}
+function topTheme(d,i){let best=null,m=0;for(const k in d.t){if(d.t[k][i]>m){m=d.t[k][i];best=k}}return best}
+
+const CFG = {
+  i:{charts:{}}, t:{charts:{}}, e:{charts:{}}, x:{charts:{}},
+  c:{data:CESAC,label:d=>`CeSAC ${d.n} · ${d.b}`,short:d=>`CeSAC ${d.n}`,color:d=>zc(d.z),
+     groups:()=>ZONES,groupOf:d=>d.z,groupColor:g=>zc(g),minBig:30,
+     filter:d=>($('c-fz').value==='all'||d.z===$('c-fz').value)&&d.c>=+$('c-fv').value,
+     cols:[['n','CeSAC'],['b','Barrio'],['z','Zona'],['r','Calificación'],['c','Reseñas'],['neg','% negativos*'],['top','Principal queja*'],['best','Principal elogio*'],['pr','Prensa']],
+     sort:{k:'r',dir:-1},charts:{}},
+  m:{data:CEMAR,label:d=>`${d.n} · ${d.b}`,short:d=>d.n,color:d=>zc(d.z),
+     groups:()=>ZONES,groupOf:d=>d.z,groupColor:g=>zc(g),minBig:0,
+     filter:d=>($('m-fz').value==='all'||d.z===$('m-fz').value),
+     cols:[['n','Centro'],['b','Barrio'],['z','Zona'],['r','Calificación'],['c','Reseñas'],['neg','% negativos*'],['top','Principal queja*'],['best','Principal elogio*']],
+     sort:{k:'r',dir:-1},charts:{}},
+  h:{data:HOSP,label:d=>d.n,short:d=>d.n,color:d=>GCOL[d.g],
+     groups:()=>Object.keys(GCOL),groupOf:d=>d.g,groupColor:g=>GCOL[g],minBig:300,
+     filter:d=>($('h-fg').value==='all'||d.g===$('h-fg').value)&&($('h-fz').value==='all'||d.z===$('h-fz').value),
+     cols:[['n','Hospital'],['g','Tipo'],['b','Barrio'],['z','Zona'],['r','Calificación'],['c','Reseñas'],['neg','% negativos*'],['top','Principal queja*'],['best','Principal elogio*']],
+     sort:{k:'r',dir:-1},charts:{}}
+};
+
+function renderInicio(){
+  const all=[...CESAC,...CEMAR,...HOSP];
+  $('i-k1').textContent=all.length; $('i-k2').textContent=all.reduce((s,d)=>s+d.c,0).toLocaleString('es-AR');
+  $('i-k3').textContent=fmt(wavg(all))+' ★'; $('i-k4').textContent=all.reduce((s,d)=>s+d.s.length,0);
+  $('i-lc').textContent=fmt(wavg(CESAC))+' ★'; $('i-lm').textContent=fmt(wavg(CEMAR))+' ★'; $('i-lh').textContent=fmt(wavg(HOSP))+' ★';
+  const L=[['CeSAC',CESAC,'#0f766e'],['CEMAR',CEMAR,'#d97706'],['Hospitales',HOSP,'#2563eb']];
+  Chart.defaults.color=css('--mut');Chart.defaults.borderColor=css('--line');Chart.defaults.font.family='Inter, system-ui, sans-serif';
+  Object.values(CFG.i.charts).forEach(c=>c.destroy()); CFG.i.charts={};
+  CFG.i.charts.lvl=new Chart($('i-lvl'),{type:'bar',data:{labels:L.map(l=>l[0]),datasets:[{data:L.map(l=>+wavg(l[1]).toFixed(2)),backgroundColor:L.map(l=>l[2]),borderRadius:6,maxBarThickness:70}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{y:{min:3,max:4.5}}}});
+  const K=['REC','ACC','GUA','FAR','TEL','INS','PRO'];
+  CFG.i.charts.neg=new Chart($('i-neg'),{type:'bar',data:{labels:K.map(k=>THEMES[k].split(' / ')[0].split(',')[0]),datasets:L.map(([n,D,c])=>{const tot=D.reduce((s,d)=>s+d.s.length,0);return{label:n,backgroundColor:c,borderRadius:3,data:K.map(k=>+(100*D.reduce((s,d)=>s+(d.t[k]?.[1]||0),0)/tot).toFixed(1))}})},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10}}},scales:{x:{ticks:{font:{size:11},maxRotation:0,autoSkip:false}}}}});
+}
+// Menciones explícitas al 147, Boti o turnos web en reseñas de Google (centro: tipo)
+const T_GOOGLE=[
+  {k:'El centro no respeta o cambia el turno dado por el 147/Boti',n:3,tone:'N',src:'CeSAC 10, CeSAC 20, Hosp. Penna'},
+  {k:'El canal no da turno, no resuelve o no maneja la agenda',n:5,tone:'N',src:'CeSAC 25, 36, 37, 47, CSM Ameghino'},
+  {k:'"No hay turnos porque Boti los dio todos"',n:1,tone:'N',src:'CeSAC 13'},
+  {k:'Error de Boti que resolvió el centro',n:1,tone:'N',src:'CeSAC 46'},
+  {k:'Turno por el 147 en menos de 24 horas',n:1,tone:'P',src:'CEMAR 3'}];
+// 20 opiniones más relevantes de BAX en Google Play (29/09/2026)
+const T_BAX_STARS=[15,1,1,3,0];
+const T_BAX_TEMAS=[['Cuelgues y rendimiento',11],['Ingreso y validación de identidad',8],['El asistente no entiende',7],['Sacar turno',3],['Compara con Boti',3]];
+function renderTurnos(){
+  const tot=T_GOOGLE.reduce((s,x)=>s+x.n,0), neg=T_GOOGLE.filter(x=>x.tone==='N').reduce((s,x)=>s+x.n,0);
+  $('t-k1').textContent=tot; $('t-k1n').textContent=`${neg} negativas · de 436 comentarios leídos`;
+  $('t-tel').textContent=[...CESAC,...CEMAR,...HOSP].reduce((s,d)=>s+(d.t.TEL?.[1]||0),0);
+  Chart.defaults.color=css('--mut');Chart.defaults.borderColor=css('--line');Chart.defaults.font.family='Inter, system-ui, sans-serif';
+  Object.values(CFG.t.charts).forEach(c=>c.destroy()); CFG.t.charts={};
+  const wrap=s=>{const w=s.split(' '),o=[];let l='';w.forEach(x=>{if((l+' '+x).trim().length>30){o.push(l.trim());l=x}else l+=' '+x});o.push(l.trim());return o};
+  CFG.t.charts.g=new Chart($('t-g'),{type:'bar',data:{labels:T_GOOGLE.map(x=>wrap(x.k)),datasets:[{data:T_GOOGLE.map(x=>x.n),backgroundColor:T_GOOGLE.map(x=>x.tone==='P'?css('--pos'):css('--neg')),borderRadius:3,maxBarThickness:22}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>T_GOOGLE[c.dataIndex].src}}},scales:{x:{ticks:{stepSize:1}},y:{ticks:{font:{size:10}}}}}});
+  CFG.t.charts.cmp=new Chart($('t-cmp'),{type:'bar',data:{labels:['Google Play','App Store'],datasets:[{data:[1.6,4.7],backgroundColor:[css('--neg'),css('--pos')],borderRadius:6,maxBarThickness:60}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' ★ · '+(c.dataIndex?'97 calificaciones':'482 opiniones')}}},scales:{y:{min:0,max:5}}}});
+  CFG.t.charts.stars=new Chart($('t-stars'),{type:'bar',data:{labels:['1★','2★','3★','4★','5★'],datasets:[{data:T_BAX_STARS,backgroundColor:[css('--neg'),css('--neg'),css('--mix'),css('--pos'),css('--pos')],borderRadius:4}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{y:{ticks:{stepSize:5}}}}});
+  CFG.t.charts.bt=new Chart($('t-bt'),{type:'bar',data:{labels:T_BAX_TEMAS.map(x=>wrap(x[0])),datasets:[{data:T_BAX_TEMAS.map(x=>x[1]),backgroundColor:css('--acc'),borderRadius:3,maxBarThickness:18}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:5},max:20},y:{ticks:{font:{size:10}}}}}});
+}
+
+// Reseñas de Google que cuentan falta de turno/atención por especialidad (lectura propia)
+const ESP=[
+  ['Vacunatorio',10,'CeSAC 3, 12, 13, 14, 15, 32, 34, 37, 38, 50',false],
+  ['Salud mental',5,'CeSAC 14, 46 · Hosp. Tornú, Moyano · CSM Ameghino',true],
+  ['Clínica / medicina general',4,'CeSAC 1, 14, 15, 25',false],
+  ['Odontología',3,'CeSAC 46 · Hosp. Dueñas, Carrillo',true],
+  ['Ginecología y obstetricia',3,'CeSAC 5, 7, 46',false],
+  ['Pediatría',2,'CeSAC 45 · Hosp. Grierson',false],
+  ['Laboratorio',2,'CeSAC 15 · Hosp. Dueñas',false],
+  ['Oftalmología',1,'Hosp. Santa Lucía',true],
+  ['Traumatología',1,'Hosp. Zubizarreta',false],
+  ['Gastroenterología',1,'Hosp. Udaondo',false],
+  ['Oncología',1,'Hosp. Marie Curie',false],
+  ['Otorrinolaringología',1,'Hosp. Piñero',false]];
+function renderEsp(){
+  $('e-k1').textContent=ESP.reduce((s,x)=>s+x[1],0); $('e-k2').textContent=ESP.length;
+  Chart.defaults.color=css('--mut');Chart.defaults.borderColor=css('--line');Chart.defaults.font.family='Inter, system-ui, sans-serif';
+  Object.values(CFG.e.charts).forEach(c=>c.destroy()); CFG.e.charts={};
+  CFG.e.charts.ch=new Chart($('e-ch'),{type:'bar',data:{labels:ESP.map(x=>x[0]),datasets:[{data:ESP.map(x=>x[1]),backgroundColor:ESP.map(x=>x[3]?css('--mix'):css('--acc')),borderRadius:3,maxBarThickness:20}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>ESP[c.dataIndex][2]}}},scales:{x:{ticks:{stepSize:2}},y:{ticks:{font:{size:11}}}}}});
+  $('e-tb').innerHTML=ESP.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td class="wrap-td">${x[2]}</td><td>${x[3]?'<span class="tag" style="color:var(--mix)">Sí</span>':'—'}</td></tr>`).join('');
+}
+
+function render(p){
+  if(p==='i') return renderInicio();
+  if(p==='t') return renderTurnos();
+  if(p==='e') return renderEsp();
+  if(p==='x') return;
+  const C=CFG[p], D=C.data.filter(C.filter);
+  const all=D.flatMap(d=>d.s), cls=all.filter(x=>x!=='O'), nN=cls.filter(x=>x==='N').length;
+  $(p+'-k1').textContent=D.length; $(p+'-k1n').textContent=`de ${C.data.length} en total`;
+  $(p+'-k2').textContent=D.reduce((s,d)=>s+d.c,0).toLocaleString('es-AR');
+  $(p+'-k3').textContent=fmt(wavg(D))+' ★';
+  $(p+'-k4').textContent=(cls.length?Math.round(100*nN/cls.length):0)+'%';
+  $(p+'-k4n').textContent=`${nN} de ${cls.length} comentarios clasificados`;
+  Chart.defaults.color=css('--mut');Chart.defaults.borderColor=css('--line');Chart.defaults.font.family='Inter, system-ui, sans-serif';
+  Object.values(C.charts).forEach(c=>c.destroy()); C.charts={};
+
+  const R=[...D].sort((a,b)=>b.r-a.r||b.c-a.c);
+  C.charts.rank=new Chart($(p+'-rank'),{type:'bar',data:{labels:R.map(C.label),datasets:[{data:R.map(d=>d.r),backgroundColor:R.map(C.color),borderRadius:3,maxBarThickness:14}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${R[c.dataIndex].r} ★ · ${R[c.dataIndex].c.toLocaleString('es-AR')} reseñas`}}},
+    scales:{x:{min:2,max:5,ticks:{stepSize:.5}},y:{ticks:{font:{size:10},autoSkip:false}}}}});
+
+  const cnt=k=>all.filter(x=>x===k).length;
+  C.charts.tone=new Chart($(p+'-tone'),{type:'doughnut',data:{labels:['Negativo','Positivo','Mixto','Neutro / consulta'],datasets:[{data:[cnt('N'),cnt('P'),cnt('M'),cnt('O')],backgroundColor:[css('--neg'),css('--pos'),css('--mix'),css('--neu')],borderColor:css('--card'),borderWidth:2}]},
+    options:{maintainAspectRatio:false,animation:false,cutout:'62%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11}}}}}});
+
+  const G=C.groups().map(g=>({g,v:wavg(D.filter(d=>C.groupOf(d)===g)),n:D.filter(d=>C.groupOf(d)===g).length})).filter(o=>o.n);
+  C.charts.group=new Chart($(p+'-group'),{type:'bar',data:{labels:G.map(o=>`${o.g} (${o.n})`),datasets:[{data:G.map(o=>+o.v.toFixed(2)),backgroundColor:G.map(o=>C.groupColor(o.g)),borderRadius:4}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{y:{min:3,max:4.8},x:{ticks:{font:{size:10}}}}}});
+
+  const T=Object.keys(THEMES).map(k=>({k,p:D.reduce((s,d)=>s+(d.t[k]?.[0]||0),0),n:D.reduce((s,d)=>s+(d.t[k]?.[1]||0),0)})).filter(t=>t.p+t.n).sort((a,b)=>(b.p+b.n)-(a.p+a.n));
+  C.charts.theme=new Chart($(p+'-theme'),{type:'bar',data:{labels:T.map(t=>THEMES[t.k]),datasets:[{label:'Quejas',data:T.map(t=>t.n),backgroundColor:css('--neg'),borderRadius:3},{label:'Elogios',data:T.map(t=>t.p),backgroundColor:css('--pos'),borderRadius:3}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10}}},scales:{x:{stacked:true},y:{stacked:true}}}});
+
+  C.charts.sc=new Chart($(p+'-scatter'),{type:'scatter',data:{datasets:C.groups().map(g=>({label:g,data:D.filter(d=>C.groupOf(d)===g).map(d=>({x:d.c,y:d.r,l:C.short(d)})),backgroundColor:C.groupColor(g),pointRadius:5,pointHoverRadius:7})).filter(s=>s.data.length)},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:c=>`${c.raw.l}: ${c.raw.y} ★ · ${c.raw.x.toLocaleString('es-AR')} reseñas`}}},
+    scales:{x:{type:'logarithmic',title:{display:true,text:'Nº de reseñas (escala log)'}},y:{min:2.4,max:5,title:{display:true,text:'Estrellas'}}}}});
+
+  const big=D.filter(d=>d.c>=C.minBig);
+  const best=[...big].sort((a,b)=>b.r-a.r)[0], worst=[...big].sort((a,b)=>a.r-b.r)[0], most=[...D].sort((a,b)=>b.c-a.c)[0];
+  $(p+'-quick').innerHTML=D.length?[
+    best&&`<div class="ins" style="border-color:var(--pos)"><b>Mejor valorado${C.minBig?` (${C.minBig}+ reseñas)`:''}</b><p>${C.label(best)} — ${best.r} ★</p></div>`,
+    worst&&`<div class="ins" style="border-color:var(--neg)"><b>Peor valorado${C.minBig?` (${C.minBig}+ reseñas)`:''}</b><p>${C.label(worst)} — ${worst.r} ★</p></div>`,
+    most&&`<div class="ins"><b>Más reseñado</b><p>${C.label(most)} — ${most.c.toLocaleString('es-AR')} reseñas</p></div>`].filter(Boolean).join(''):'<p class="hint">Sin datos para este filtro</p>';
+
+  if(p==='c') renderPress(D);
+  renderTable(p,D);
+}
+
+function renderPress(D){
+  const ids=new Set(D.map(d=>d.n)), zf=$('c-fz').value!=='all'||+$('c-fv').value>0;
+  const P=PRESS.filter(x=>!zf||x.n.some(n=>ids.has(n)));
+  $('c-k5').textContent=P.length;
+  const pt={};P.forEach(x=>pt[x.t]=(pt[x.t]||0)+1);const pk=Object.keys(pt).sort((a,b)=>pt[b]-pt[a]);
+  CFG.c.charts.press=new Chart($('c-press'),{type:'bar',data:{labels:pk,datasets:[{data:pk.map(k=>pt[k]),backgroundColor:pk.map(k=>PCOL[k]),borderRadius:4}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:1}}}}});
+  $('c-pb').innerHTML=[...P].sort((a,b)=>+b.y-+a.y).map(x=>`<tr><td>${x.y}</td><td>${x.n.length?x.n.join(', '):'Red / nuevo'}</td>
+    <td><span class="tag" style="color:${PCOL[x.t]}">${x.t}</span></td>
+    <td class="wrap-td"><b>${x.titulo}</b><br><span style="color:var(--mut)">${x.res}</span></td>
+    <td class="src"><a href="${x.u}" target="_blank" rel="noopener">${x.f}</a></td></tr>`).join('')||'<tr><td colspan="5" class="hint">Sin casos para este filtro</td></tr>';
+}
+
+function renderTable(p,D){
+  const C=CFG[p], {k,dir}=C.sort;
+  $(p+'-th').innerHTML=C.cols.map(([key,lab])=>`<th data-k="${key}">${lab}${key===k?(dir>0?' ▲':' ▼'):''}</th>`).join('');
+  $(p+'-th').querySelectorAll('th').forEach(th=>th.onclick=()=>{const nk=th.dataset.k;C.sort.dir=(C.sort.k===nk)?-C.sort.dir:(['b','z','g','n','top','best'].includes(nk)&&p==='h'||['b','z','top','best'].includes(nk)?1:-1);C.sort.k=nk;renderTable(p,CFG[p].data.filter(C.filter))});
+  const rows=D.map(d=>({...d,neg:negPct(d),top:topTheme(d,1),best:topTheme(d,0),pr:p==='c'?PRESS.filter(x=>x.n.includes(d.n)).length:0}));
+  rows.sort((a,b)=>{let x=a[k]??'',y=b[k]??'';if(k==='top'||k==='best'){x=THEMES[x]||'';y=THEMES[y]||''}return (x>y?1:x<y?-1:0)*dir});
+  const rc=r=>r>=4?css('--pos'):r>=3.5?css('--mix'):css('--neg');
+  const cell={
+    n:d=>`<b>${p==='c'?'CeSAC '+d.n:d.n}</b>`, b:d=>d.b, g:d=>`<span class="pill" style="background:${GCOL[d.g]}">${d.g}</span>`,
+    z:d=>`<span class="pill" style="background:${zc(d.z)}">${d.z}</span>`,
+    r:d=>`<span class="bar" style="width:${(d.r-2)*30}px;background:${rc(d.r)}"></span> ${d.r.toFixed(1).replace('.',',')}`,
+    c:d=>d.c.toLocaleString('es-AR'), neg:d=>d.neg+'%',
+    top:d=>d.top?`<span class="tag n">${THEMES[d.top]}</span>`:'—', best:d=>d.best?`<span class="tag p">${THEMES[d.best]}</span>`:'—',
+    pr:d=>d.pr?`<span class="tag">${d.pr} caso${d.pr>1?'s':''}</span>`:''};
+  $(p+'-tb').innerHTML=rows.map(d=>'<tr>'+C.cols.map(([key])=>`<td>${cell[key](d)}</td>`).join('')+'</tr>').join('');
+}
+
+const shown={i:false,c:false,m:false,h:false,t:false,e:false,x:false};
+function show(p){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===p));
+  document.querySelectorAll('.pane').forEach(s=>s.classList.toggle('on',s.id==='pane-'+p));
+  render(p); shown[p]=true;
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+['c-fz','c-fv'].forEach(id=>$(id).onchange=()=>render('c'));
+['h-fg','h-fz'].forEach(id=>$(id).onchange=()=>render('h'));
+$('m-fz').onchange=()=>render('m');
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{Object.keys(shown).forEach(p=>shown[p]&&render(p))});
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();show(el.dataset.go);window.scrollTo({top:0,behavior:'smooth'})}));
+show('i');
+</script>
+</body>
+</html>
